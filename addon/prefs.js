@@ -1,0 +1,13 @@
+pref("provider", "");
+pref("baseURL", "");
+pref("model", "");
+pref("apiKey", "");
+pref("effort", "medium");
+pref("providerEffort", "{}");
+pref("fontSize", 14);
+pref("textDirection", "auto");
+pref("focusMode", false);
+pref("helperModel", "");
+pref("modelCache", "{}");
+pref("prompts", "{}");
+pref("disclosureAccepted", false);

@@ -1,0 +1,215 @@
+/* Konnash settings pane. Bundled and injected by preferences.ts; every rule
+   is scoped to .konnash-prefs so other panes are unaffected. */
+
+.konnash-prefs {
+  --kp-line: var(--fill-quinary, rgba(127, 127, 127, 0.22));
+  --kp-muted: var(--fill-secondary, GrayText);
+  --kp-accent: #8f7ae6;
+  --kp-surface: color-mix(in srgb, var(--fill-primary, CanvasText) 4%, transparent);
+  gap: 14px;
+  max-width: 760px;
+}
+.konnash-prefs [hidden] {
+  display: none !important;
+}
+.konnash-prefs .kp-card {
+  padding: 14px 16px 12px;
+  border: 1px solid var(--kp-line);
+  border-radius: 10px;
+  background: var(--kp-surface);
+}
+.konnash-prefs .kp-card h2 {
+  margin: 0 0 6px;
+  font-size: 1.1em;
+}
+.konnash-prefs .kp-slogan {
+  margin: -2px 0 8px;
+  color: var(--kp-accent);
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.konnash-prefs .kp-help,
+.konnash-prefs .kp-note {
+  margin: 4px 0 10px;
+  color: var(--kp-muted);
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+.konnash-prefs .kp-note {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--kp-accent) 9%, transparent);
+  color: inherit;
+}
+.konnash-prefs .kp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+.konnash-prefs .kp-label {
+  width: 110px;
+  flex: none;
+  font-weight: 500;
+}
+.konnash-prefs .kp-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 420px;
+}
+.konnash-prefs .kp-button {
+  flex: none;
+}
+.konnash-prefs .kp-path {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--kp-surface);
+  border: 1px solid var(--kp-line);
+  font-size: 0.88em;
+  word-break: break-all;
+}
+
+/* Prompt list */
+.konnash-prefs .kp-group {
+  margin: 12px 0 4px;
+  color: var(--kp-muted);
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.konnash-prefs .kp-prompts {
+  border: 1px solid var(--kp-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.konnash-prefs .kp-prompt {
+  padding: 8px 12px;
+  border-top: 1px solid var(--kp-line);
+}
+.konnash-prefs .kp-prompt:first-child {
+  border-top: none;
+}
+.konnash-prefs .kp-prompt.kp-hidden .kp-prompt-label,
+.konnash-prefs .kp-prompt.kp-hidden .kp-prompt-preview {
+  opacity: 0.45;
+}
+.konnash-prefs .kp-prompt-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.konnash-prefs .kp-prompt-label {
+  font-weight: 600;
+}
+.konnash-prefs .kp-badge {
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 0.78em;
+  line-height: 1.6;
+  border: 1px solid var(--kp-muted);
+  color: var(--kp-muted);
+}
+.konnash-prefs .kp-badge.kp-own {
+  border-color: var(--kp-accent);
+  color: var(--kp-accent);
+}
+.konnash-prefs .kp-badge.kp-off {
+  border-color: var(--kp-line);
+  color: var(--kp-muted);
+}
+.konnash-prefs .kp-spacer {
+  flex: 1;
+}
+.konnash-prefs .kp-link {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  margin: 0;
+  color: var(--kp-accent);
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.konnash-prefs .kp-link:hover {
+  text-decoration: underline;
+}
+.konnash-prefs .kp-default {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.88em;
+  color: var(--kp-muted);
+}
+.konnash-prefs .kp-prompt-preview {
+  margin-top: 2px;
+  color: var(--kp-muted);
+  font-size: 0.9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.konnash-prefs .kp-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.konnash-prefs .kp-editor input {
+  max-width: 280px;
+  font-weight: 600;
+}
+.konnash-prefs .kp-editor textarea {
+  width: 100%;
+  min-height: 96px;
+  box-sizing: border-box;
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+.konnash-prefs .kp-editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.konnash-prefs .kp-list-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+.konnash-prefs .kp-principles {
+  margin: 6px 0 2px;
+  padding-inline-start: 18px;
+  line-height: 1.5;
+}
+.konnash-prefs .kp-principles li {
+  margin: 3px 0;
+}
+.konnash-prefs .kp-subhead {
+  margin: 14px 0 2px;
+  font-size: 1em;
+}
+.konnash-prefs .kp-report {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--kp-surface);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.konnash-prefs .kp-report-head {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.konnash-prefs .kp-report-skip {
+  color: var(--kp-muted);
+}
+.konnash-prefs .kp-report-note {
+  color: var(--kp-muted);
+  margin-top: 4px;
+  word-break: break-all;
+}

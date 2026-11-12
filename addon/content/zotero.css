@@ -1,0 +1,59 @@
+/* Konnash — the only rules applied to Zotero's own document: when the
+   Konnash icon is selected in a reader tab, its section fills the right
+   pane and everything else in the item pane is hidden. */
+
+:root[data-konnash-view="chat"] #zotero-context-pane item-details item-pane-header,
+:root[data-konnash-view="chat"]
+  #zotero-context-pane
+  item-details
+  .zotero-view-item
+  > [data-pane]:not(.konnash-section),
+:root[data-konnash-view="chat"] #zotero-context-pane .konnash-section > collapsible-section > .head {
+  display: none !important;
+}
+:root[data-konnash-view="chat"] #zotero-context-pane item-details .zotero-view-item-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+:root[data-konnash-view="chat"] #zotero-context-pane item-details .zotero-view-item {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+:root[data-konnash-view="chat"] #zotero-context-pane item-details .zotero-view-item::before,
+:root[data-konnash-view="chat"] #zotero-context-pane item-details .zotero-view-item::after {
+  display: none !important;
+}
+:root[data-konnash-view="chat"] #zotero-context-pane .konnash-section,
+:root[data-konnash-view="chat"] #zotero-context-pane .konnash-section > collapsible-section,
+:root[data-konnash-view="chat"]
+  #zotero-context-pane
+  .konnash-section
+  > collapsible-section
+  > [data-type="body"] {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+:root[data-konnash-view="chat"]
+  #zotero-context-pane
+  .konnash-section
+  > collapsible-section
+  > [data-type="body"] {
+  padding: 10px 14px 10px;
+}
+:root[data-konnash-view="chat"] #zotero-context-pane .konnash-host {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.konnash-host {
+  display: block;
+}

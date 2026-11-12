@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Konnash intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #f7f4ec;
+    --ink: #2b2620;
+    --muted: #6e665a;
+    --line: #e3dccd;
+    --accent: #5b47b0;
+    --k-accent: #8f7ae6;
+    --k-accent-soft: rgba(143, 122, 230, 0.15);
+    --k-text: #1f1f1f;
+    --k-muted: #6b6b6b;
+    --k-faint: #9a9a9a;
+    --k-line: rgba(0, 0, 0, 0.12);
+    --k-raised: #f3f3f3;
+    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+    --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+  body { font-family: var(--sans); color: var(--ink); }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+  /* ---------------------------------------------------------- title / closing */
+  .card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+  .card img { width: 132px; height: 132px; }
+  .card h1 { font: 600 76px/1 var(--serif); margin: 26px 0 14px; letter-spacing: 0.01em; }
+  .card .slogan { font: 600 22px var(--sans); letter-spacing: 0.34em; text-transform: uppercase; color: var(--accent); margin: 0; padding-left: 0.34em; }
+  #maxims { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 34px; opacity: 0; }
+  .maxim { font: 400 56px/1.2 var(--serif); color: var(--ink); opacity: 0; text-align: center; }
+
+  /* ---------------------------------------------------------- Zotero-like windows */
+  #win, #inst {
+    position: absolute; left: 110px; top: 44px; width: 1700px; height: 900px;
+    background: #fff; border-radius: 12px; overflow: hidden; opacity: 0;
+    box-shadow: 0 30px 80px rgba(60, 45, 20, 0.22), 0 0 0 1px rgba(60, 45, 20, 0.1);
+  }
+  #win { display: flex; flex-direction: column; }
+  .titlebar { height: 44px; background: #ececec; border-bottom: 1px solid #d8d8d8; display: flex; align-items: flex-end; padding: 0 12px; gap: 4px; flex: none; }
+  .tab { height: 34px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #555; border-radius: 8px 8px 0 0; }
+  .tab.on { background: #fff; color: #222; }
+  .tab svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.4; }
+  .wbody { flex: 1; display: flex; min-height: 0; }
+  .reader { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #e9e9e9; }
+  .rtool { height: 44px; background: #fafafa; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 18px; padding: 0 18px; font-size: 14px; color: #666; flex: none; }
+  .rtool i { display: inline-block; width: 18px; height: 14px; border: 1.5px solid #888; border-radius: 3px; }
+  .rtool .pg { margin-inline: auto; }
+  .pdfwrap { flex: 1; position: relative; overflow: hidden; }
+  #page {
+    position: absolute; left: 50%; top: 24px; width: 700px; margin-left: -350px;
+    background: #fff; padding: 56px 64px 64px; box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+    font: 400 19.5px/1.62 var(--serif); color: #1c1c1c; text-align: justify;
+  }
+  #page h2 { font: 600 30px/1.2 var(--serif); margin: 0 0 8px; text-align: left; }
+  #page .by { font: 15px var(--sans); color: #777; margin: 0 0 26px; text-align: left; }
+  #page h3 { font: 600 20px var(--serif); margin: 26px 0 6px; text-align: left; }
+  #page p { margin: 0 0 12px; }
+  #page .ctx { background-color: rgba(143, 122, 230, 0); border-radius: 3px; }
+  #page .hl { background-color: rgba(143, 122, 230, 0); border-radius: 2px; }
+  #mp { border-radius: 5px; }
+  .nav { width: 52px; flex: none; background: #f4f4f4; border-left: 1px solid #ddd; display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 6px; }
+  .nav b { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .nav b span { width: 16px; height: 16px; border: 1.5px solid #9a9a9a; border-radius: 4px; }
+  .nav b.k { color: #8a8a8a; }
+  .nav b.k.on { background: rgba(143, 122, 230, 0.2); color: #6b55c9; }
+  .sep { width: 24px; height: 1px; background: #d6d6d6; margin: 4px 0; }
+  #side { width: 0; flex: none; background: #fff; border-left: 1px solid #ddd; overflow: hidden; position: relative; }
+  #panelwrap { position: absolute; left: 0; top: 0; width: 560px; height: 100%; padding: 12px 18px 16px; }
+
+  /* ---------------------------------------------------------- the panel (same rules as the add-on) */
+  .k-panel { height: 100%; display: flex; flex-direction: column; font-size: 17px; line-height: 1.6; color: var(--k-text); position: relative; }
+  .k-head { display: flex; align-items: center; gap: 4px; padding: 2px 0 10px; border-bottom: 1px solid var(--k-line); font-size: 15.5px; line-height: 1.3; flex: none; }
+  .k-head-title { flex: 1; min-width: 0; font-weight: 600; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .k-head-title .t { overflow: hidden; text-overflow: ellipsis; }
+  .k-tagline { color: var(--k-faint); font-weight: 400; }
+  .k-tagline::before { content: "·"; margin-inline-end: 7px; }
+  .k-iconbtn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; color: var(--k-muted); border-radius: 7px; }
+  .k-iconbtn.hover { background: rgba(0, 0, 0, 0.07); color: var(--k-text); }
+  svg.k-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .k-body { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+  #stream { position: absolute; left: 0; right: 0; top: 0; padding: 4px 2px 0 0; }
+  .k-empty { padding: 22px 0 8px; }
+  .k-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .k-card { display: flex; flex-direction: column; gap: 4px; min-height: 128px; padding: 14px 15px; border: 1px solid var(--k-line); border-radius: 11px; background: var(--k-raised); line-height: 1.35; }
+  .k-card.hover { border-color: var(--k-accent); background: var(--k-accent-soft); }
+  .k-card-title { font-weight: 600; font-size: 0.95em; }
+  .k-card-text { color: var(--k-muted); font-size: 0.82em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .k-turn { display: flex; flex-direction: column; padding-top: 4px; }
+  .k-q { align-self: flex-end; max-width: 92%; padding: 8px 14px; border-radius: 15px; background: var(--k-accent-soft); line-height: 1.5; }
+  .k-a { margin-top: 8px; }
+  .thinking { color: var(--k-muted); font-size: 0.88em; }
+  .think-tail { color: var(--k-faint); font-size: 0.82em; margin-top: 3px; font-style: italic; }
+  .konnash-answer { line-height: 1.62; }
+  .konnash-answer p { margin: 0 0 10px; }
+  sup.konnash-cite { font-size: 0.7em; line-height: 0; vertical-align: super; padding: 2px 3px; margin: 0 -1px; font-weight: 600; color: var(--k-accent); opacity: 0.8; border-radius: 3px; }
+  sup.konnash-cite.hover, sup.konnash-cite.active { opacity: 1; background: var(--k-accent-soft); }
+  .konnash-a-footer { color: var(--k-faint); font-size: 0.82em; margin-top: 2px; }
+  .konnash-a-tools { color: var(--k-faint); font-size: 0.82em; display: flex; gap: 14px; margin-top: 4px; }
+  .konnash-a-tools span.hover { color: var(--k-text); text-decoration: underline; }
+  .k-composer { padding-top: 10px; flex: none; }
+  .k-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+  .k-pill { padding: 2px 11px; border: 1px solid var(--k-line); border-radius: 999px; color: var(--k-muted); font-size: 0.8em; line-height: 1.6; }
+  .k-box { border: 1px solid var(--k-line); border-radius: 11px; background: var(--k-raised); }
+  .k-box.focus { border-color: var(--k-accent); }
+  .k-box-banner { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-bottom: 1px solid var(--k-line); color: var(--k-accent); font-size: 0.8em; line-height: 1.4; }
+  .k-box-quote { margin: 9px 9px 0; display: flex; gap: 6px; align-items: flex-start; }
+  .k-quote { flex: 1; padding: 6px 11px; border-inline-start: 3px solid #9e9e9e; border-radius: 0 6px 6px 0; background: rgba(158, 158, 158, 0.1); font-size: 0.86em; line-height: 1.45; }
+  .k-quote-meta { display: block; color: var(--k-muted); font-size: 0.9em; }
+  .k-quote-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-style: italic; }
+  .k-input { min-height: 3.2em; padding: 11px 14px 4px; line-height: 1.5; white-space: pre-wrap; color: var(--k-text); }
+  .k-input.ph { color: var(--k-faint); }
+  .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--k-accent); vertical-align: -3px; margin-left: 1px; }
+  .k-box-bar { display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px 10px; }
+  .k-scope { display: inline-flex; align-items: center; gap: 6px; min-width: 215px; padding: 3px 10px; border-radius: 999px; color: var(--k-muted); font-size: 0.82em; white-space: nowrap; }
+  .k-scope.on { color: var(--k-accent); background: var(--k-accent-soft); }
+  .k-scope.hover { background: rgba(0, 0, 0, 0.07); }
+  .k-scope.on.hover { background: var(--k-accent-soft); }
+  .k-spacer { flex: 1; }
+  .k-send { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--k-accent); color: #fff; opacity: 0.35; }
+  .k-send.on { opacity: 1; }
+  .k-send svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .konnash-card { position: absolute; z-index: 20; width: 490px; padding: 12px 14px; border: 1px solid var(--k-line); border-radius: 11px; background: #fff; box-shadow: 0 10px 32px rgba(0, 0, 0, 0.26); font-size: 14.5px; line-height: 1.5; opacity: 0; }
+  .konnash-card-meta { color: var(--k-muted); font-size: 13px; margin-bottom: 4px; }
+  .konnash-card-quote { margin-bottom: 8px; }
+  .konnash-card-actions { display: flex; gap: 8px; }
+  .konnash-card-button { padding: 3px 11px; border: 1px solid var(--k-line); border-radius: 7px; font-size: 13px; color: var(--k-text); }
+
+  /* ---------------------------------------------------------- popovers, toast, note, selection */
+  .pop { position: absolute; z-index: 30; background: #fff; border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 11px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.26); padding: 5px; opacity: 0; font-size: 15px; line-height: 1.35; color: #1f1f1f; }
+  .pi { display: flex; gap: 10px; align-items: flex-start; padding: 8px 11px; border-radius: 7px; }
+  .pi svg { width: 17px; height: 17px; margin-top: 2px; flex: none; fill: none; stroke: #666; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .pi .l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pi .d { color: #777; font-size: 12.5px; margin-top: 1px; }
+  .pi .tx { min-width: 0; }
+  .pi.hover, .pi.sel { background: rgba(0, 0, 0, 0.06); }
+  .pi.on svg { stroke: var(--k-accent); }
+  .psep { height: 1px; background: rgba(0, 0, 0, 0.1); margin: 4px 6px; }
+  #toast { position: absolute; z-index: 31; left: 1250px; top: 760px; padding: 10px 16px; border-radius: 9px; background: #2b2b2b; color: #fff; font-size: 14.5px; opacity: 0; max-width: 470px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #note { position: absolute; z-index: 25; left: 190px; top: 118px; width: 700px; padding: 26px 34px 22px; background: #fff; border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 12px; box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28); opacity: 0; font: 400 17px/1.55 var(--sans); color: #1f1f1f; }
+  #note .nbar { font-size: 12.5px; color: #888; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  #note h1 { font: 700 23px/1.25 var(--sans); margin: 0 0 14px; }
+  #note h2 { font: 600 18px/1.35 var(--sans); margin: 0 0 6px; }
+  #note p { margin: 0 0 10px; }
+  #note sup { color: #6b55c9; font-weight: 600; font-size: 0.7em; }
+  #note .src { font-weight: 600; margin: 16px 0 4px; }
+  #note ol { margin: 0; padding-left: 22px; font-size: 14.5px; color: #555; }
+  #note li { margin: 3px 0; }
+  .selrect { position: absolute; z-index: 8; background: rgba(60, 130, 240, 0.28); pointer-events: none; }
+
+  /* ---------------------------------------------------------- install screens (Zotero's own look, simplified) */
+  .scr { position: absolute; inset: 0; display: flex; flex-direction: column; background: #fff; opacity: 0; }
+  .menubar { height: 36px; background: #f6f6f6; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 2px; padding: 0 12px; font-size: 15px; color: #333; flex: none; }
+  .menubar span { padding: 5px 12px; border-radius: 6px; }
+  .menubar span.on { background: #dcdcdc; }
+  .zbody { flex: 1; display: flex; min-height: 0; }
+  .ztree { width: 280px; background: #f4f4f4; border-right: 1px solid #ddd; padding: 14px 10px; font-size: 15px; color: #333; }
+  .ztree div { padding: 5px 12px; border-radius: 6px; }
+  .ztree .sel { background: #dcd6f3; }
+  .ztree .grp { color: #888; font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 18px; }
+  .zlist { flex: 1; border-right: 1px solid #ddd; }
+  .zrow { display: flex; gap: 14px; padding: 11px 18px; border-bottom: 1px solid #eee; font-size: 15px; color: #333; }
+  .zrow b { flex: 1; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .zrow i { width: 160px; font-style: normal; color: #888; }
+  .zrow.head { color: #888; font-size: 13px; background: #fafafa; }
+  .zrow.sel { background: #dcd6f3; }
+  .zinfo { width: 420px; padding: 26px; }
+  .bar { height: 12px; border-radius: 6px; background: #ececec; margin: 0 0 14px; }
+  .dd { position: absolute; z-index: 10; background: #fff; border: 1px solid rgba(0, 0, 0, 0.16); border-radius: 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22); padding: 5px; opacity: 0; font-size: 15px; min-width: 240px; color: #222; }
+  .di { padding: 7px 12px; border-radius: 6px; display: flex; justify-content: space-between; gap: 24px; white-space: nowrap; }
+  .di.hover { background: #dcd6f3; }
+  .plhead { display: flex; align-items: center; gap: 16px; padding: 22px 34px 10px; }
+  .plhead h3 { font: 600 24px var(--sans); margin: 0; flex: 1; }
+  .plsearch { width: 280px; height: 34px; border: 1px solid #d6d6d6; border-radius: 8px; padding: 6px 12px; font-size: 14px; color: #999; }
+  #gear { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #555; }
+  #gear.hover, #gear.on { background: #e6e6e6; }
+  #gear svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+  .pllist { padding: 8px 34px; display: flex; flex-direction: column; gap: 12px; }
+  .plrow { height: 96px; border: 1px solid #e4e4e4; border-radius: 12px; display: flex; align-items: center; gap: 18px; padding: 0 22px; }
+  .plrow.skel .ph1 { width: 48px; height: 48px; border-radius: 10px; background: #ececec; }
+  .plrow.skel .ph2 { width: 260px; height: 14px; border-radius: 7px; background: #ececec; box-shadow: 0 26px 0 -2px #f2f2f2; margin-bottom: 26px; }
+  #plugrow { overflow: hidden; border-color: rgba(143, 122, 230, 0.55); background: rgba(143, 122, 230, 0.06); }
+  #plugrow img { width: 52px; height: 52px; }
+  #plugrow .nm { font: 600 19px var(--sans); }
+  #plugrow .ds { font-size: 14.5px; color: #666; }
+  #plugrow .sw { margin-left: auto; font-size: 13.5px; color: #4a8a4a; display: flex; align-items: center; gap: 8px; }
+  #plugrow .sw i { width: 38px; height: 22px; border-radius: 11px; background: #5aa65a; position: relative; }
+  #plugrow .sw i::after { content: ""; position: absolute; right: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+  #filedlg { position: absolute; z-index: 12; left: 520px; top: 190px; width: 660px; height: 400px; background: #fff; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 12px; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35); opacity: 0; overflow: hidden; }
+  #filedlg .fh { padding: 14px 20px; background: #f1f1f1; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 15px; }
+  #filedlg .fp { padding: 10px 20px; color: #666; font-size: 13.5px; border-bottom: 1px solid #eee; }
+  #filedlg .ff { display: flex; gap: 12px; align-items: center; padding: 9px 20px; font-size: 15px; }
+  #filedlg .ff.hover { background: #eeeaf9; }
+  #filedlg .ff.sel { background: #dcd6f3; }
+  #filedlg .ff s { width: 18px; height: 22px; border: 1.5px solid #999; border-radius: 3px; display: inline-block; }
+  #filedlg .fb { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px; background: #f6f6f6; border-top: 1px solid #ddd; }
+  .btn { padding: 7px 22px; border: 1px solid #c9c9c9; border-radius: 8px; font-size: 14.5px; background: #fff; }
+  .btn.pri { background: #6b55c9; border-color: #6b55c9; color: #fff; }
+  .btn.hover { filter: brightness(0.93); }
+  .setbody { flex: 1; display: flex; min-height: 0; }
+  .setnav { width: 250px; background: #f4f4f4; border-right: 1px solid #ddd; padding: 16px 10px; font-size: 15.5px; color: #333; }
+  .setnav div { padding: 8px 14px; border-radius: 7px; }
+  .setnav .sel { background: #dcd6f3; }
+  .setmain { flex: 1; padding: 28px 44px; display: flex; flex-direction: column; gap: 18px; position: relative; }
+  .kcard { border: 1px solid #e1e1e1; border-radius: 12px; padding: 18px 22px; }
+  .kcard h2 { font: 600 19px var(--sans); margin: 0 0 4px; }
+  .kslogan { margin: 0 0 4px; color: #8f7ae6; font-size: 12.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+  .khelp { margin: 6px 0 14px; color: #6b6b6b; font-size: 14.5px; line-height: 1.5; max-width: 640px; }
+  .krow { display: flex; align-items: center; gap: 16px; margin: 10px 0; }
+  .krow label { width: 120px; font-size: 15px; color: #444; }
+  .menulist, .kinput { height: 38px; border: 1px solid #cfcfcf; border-radius: 8px; width: 380px; display: flex; align-items: center; padding: 0 14px; font-size: 15px; color: #666; background: #fff; gap: 8px; }
+  .menulist span { flex: 1; }
+  .menulist.hover { border-color: #8f7ae6; }
+  .kinput.focus { border-color: #8f7ae6; box-shadow: 0 0 0 3px rgba(143, 122, 230, 0.18); color: #222; letter-spacing: 0.12em; }
+  .skbar { display: inline-block; width: 150px; height: 12px; border-radius: 6px; background: #d9d9d9; }
+
+  /* ---------------------------------------------------------- caption and cursor */
+  #caption { position: absolute; left: 0; right: 0; top: 982px; text-align: center; font: 400 33px/1.3 var(--serif); color: var(--ink); opacity: 0; letter-spacing: 0.005em; }
+  #cursor { position: absolute; left: 0; top: 0; width: 30px; height: 30px; z-index: 50; opacity: 0; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3)); }
+  #ripple { position: absolute; z-index: 49; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; border: 2px solid var(--k-accent); opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="card" id="intro"><img src="../icon.png" alt="" /><h1>Konnash</h1><p class="slogan">AI for Scholars</p></div>
+
+  <!-- 1 · installing -->
+  <div id="inst">
+    <div class="scr" id="scrA">
+      <div class="titlebar"><div class="tab on"><svg viewBox="0 0 16 16"><path d="M2.5 3h11v10h-11z M2.5 6.5h11"/></svg>My Library</div></div>
+      <div class="menubar"><span>File</span><span>Edit</span><span>View</span><span id="m-tools">Tools</span><span>Help</span></div>
+      <div class="zbody">
+        <div class="ztree"><div class="sel">My Library</div><div>Unfiled Items</div><div>Duplicate Items</div><div>Trash</div><div class="grp">Collections</div><div>Course reading</div><div>Thesis</div><div>To read</div></div>
+        <div class="zlist">
+          <div class="zrow head"><b>Title</b><i>Creator</i><i>Year</i></div>
+          <div class="zrow sel"><b>Reading in a Second Language: A Decade of Evidence</b><i>Researcher</i><i>2023</i></div>
+          <div class="zrow"><b>Vocabulary and comprehension in adult learners</b><i>Scholar</i><i>2021</i></div>
+          <div class="zrow"><b>Extensive reading: a classroom study</b><i>Author</i><i>2019</i></div>
+          <div class="zrow"><b>Measuring reading fluency across languages</b><i>Writer</i><i>2020</i></div>
+        </div>
+        <div class="zinfo"><div class="bar" style="width:70%"></div><div class="bar" style="width:92%"></div><div class="bar" style="width:55%"></div><div class="bar" style="width:84%;margin-top:30px"></div><div class="bar" style="width:62%"></div></div>
+      </div>
+      <div class="dd" id="toolsmenu">
+        <div class="di"><span>Equation Editor…</span></div>
+        <div class="di"><span>Manage Attachments</span><span>›</span></div>
+        <div style="height:1px;background:rgba(0,0,0,.1);margin:4px 6px"></div>
+        <div class="di hv" id="mi-plugins"><span>Plugins</span></div>
+        <div class="di"><span>Developer</span><span>›</span></div>
+      </div>
+    </div>
+
+    <div class="scr" id="scrB">
+      <div class="titlebar"><div class="tab"><svg viewBox="0 0 16 16"><path d="M2.5 3h11v10h-11z M2.5 6.5h11"/></svg>My Library</div><div class="tab on">Plugins</div></div>
+      <div class="plhead"><h3>Plugins</h3><div class="plsearch">Search plugins</div><div id="gear" class="hv"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div></div>
+      <div class="pllist">
+        <div class="plrow" id="plugrow" style="max-height:0;opacity:0;border-width:0"><img src="../icon.png" alt=""><div><div class="nm">Konnash</div><div class="ds">AI for Scholars</div></div><div class="sw">Enabled<i></i></div></div>
+        <div class="plrow skel"><div class="ph1"></div><div class="ph2"></div></div>
+        <div class="plrow skel"><div class="ph1"></div><div class="ph2"></div></div>
+      </div>
+      <div class="dd" id="gearmenu" style="right:40px;top:104px;min-width:300px">
+        <div class="di"><span>Check for Updates</span></div>
+        <div class="di hv" id="gear-install"><span>Install Plugin From File…</span></div>
+        <div class="di"><span>Update Plugins Automatically</span></div>
+      </div>
+      <div id="filedlg">
+        <div class="fh">Select a plugin file</div>
+        <div class="fp">Downloads</div>
+        <div class="ff"><s></s>notes.txt</div>
+        <div class="ff hv" id="dlg-file"><s></s>konnash.xpi</div>
+        <div class="ff"><s></s>paper-draft.pdf</div>
+        <div class="fb"><span class="btn">Cancel</span><span class="btn pri hv" id="dlg-open">Open</span></div>
+      </div>
+    </div>
+
+    <div class="scr" id="scrC">
+      <div class="titlebar"><div class="tab on">Settings</div></div>
+      <div class="setbody">
+        <div class="setnav"><div>General</div><div>Sync</div><div>Export</div><div>Cite</div><div>Advanced</div><div class="sel">Konnash</div></div>
+        <div class="setmain">
+          <div class="kcard"><h2>Konnash</h2><p class="kslogan">AI for Scholars</p></div>
+          <div class="kcard">
+            <h2>AI provider</h2>
+            <p class="khelp">Konnash sends only the PDF you are reading and your question to the provider you choose. Your API key is stored in Zotero's preferences on this computer.</p>
+            <div class="krow"><label>Provider</label><div class="menulist hv" id="provbox"><span id="provtext">Choose a provider…</span><svg class="k-icon" style="width:12px;height:12px" viewBox="0 0 16 16"><path d="M4 6L8 10L12 6"/></svg></div></div>
+            <div class="krow"><label>API key</label><div class="kinput" id="keybox"></div></div>
+          </div>
+          <div class="dd" id="provlist" style="left:204px;top:326px;min-width:380px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 · reading -->
+  <div id="win">
+    <div class="titlebar">
+      <div class="tab"><svg viewBox="0 0 16 16"><path d="M2.5 3h11v10h-11z M2.5 6.5h11"/></svg>My Library</div>
+      <div class="tab on"><svg viewBox="0 0 16 16"><path d="M4 2h6l3 3v9H4z"/></svg>Reading in a Second Language</div>
+    </div>
+    <div class="wbody">
+      <div class="reader">
+        <div class="rtool"><i></i><span>−</span><span>+</span><span class="pg">4 / 12</span><span>⌕</span></div>
+        <div class="pdfwrap">
+          <div id="page">
+            <h2>Reading in a Second Language: A Decade of Evidence</h2>
+            <div class="by">A. Researcher · B. Scholar — illustrative text</div>
+            <p>This review surveys a decade of research on how adults read in a second language. It asks which instructional approaches are associated with gains in comprehension, and how consistently those gains are reported across settings.</p>
+            <h3>1 Introduction</h3>
+            <p>Reading in a second language draws on vocabulary, grammar and background knowledge at once, and the balance between them shifts as a reader gains experience. Earlier reviews have tended to examine one approach at a time.</p>
+            <p>Here we bring the evidence together, so that teachers and researchers can see where the findings agree and where they do not.</p>
+            <h3>2 Method</h3>
+            <p id="mp"><span class="ctx">We searched five databases for studies published between 2012 and 2022. <span class="hl" id="s1">Of the 412 studies screened, 138 met the criteria for a full review.</span> <span class="hl" id="s2">Each study was read and coded independently by two readers, and disagreements were resolved by discussion.</span></span></p>
+            <p><span class="hl" id="s3">Most of the studies took place in university settings, and few reported follow-up beyond one semester.</span> Sample sizes ranged widely, from small classroom groups to national cohorts.</p>
+            <h3>3 Findings</h3>
+            <p>Across the included studies, approaches that combined extensive reading with explicit vocabulary teaching were most often associated with gains, although the size of the gains varied with the measures used.</p>
+            <p>Studies that reported delayed tests found that part of the early advantage faded, which suggests that long-term effects deserve more attention than they have received.</p>
+          </div>
+        </div>
+      </div>
+      <div id="side">
+        <div id="panelwrap">
+          <div class="k-panel">
+            <div class="k-head">
+              <div class="k-head-title" id="headtitle"></div>
+              <span class="k-iconbtn"><svg class="k-icon" viewBox="0 0 16 16"><path d="M2.5 3.5C4.5 2.6 6.5 2.6 8 3.6V13.4C6.5 12.4 4.5 12.4 2.5 13.3Z"/><path d="M13.5 3.5C11.5 2.6 9.5 2.6 8 3.6V13.4C9.5 12.4 11.5 12.4 13.5 13.3Z"/></svg></span>
+              <span class="k-iconbtn hv" id="newbtn"><svg class="k-icon" viewBox="0 0 16 16"><path d="M8 3.5V12.5M3.5 8H12.5"/></svg></span>
+            </div>
+            <div class="k-body">
+              <div id="stream">
+                <div class="k-empty" id="empty">
+                  <div class="k-cards">
+                    <div class="k-card"><span class="k-card-title">Overview</span><span class="k-card-text">Give me an overview of this document. Start with two to four sentences on what it is, its aim…</span></div>
+                    <div class="k-card" id="card-findings"><span class="k-card-title">Key findings</span><span class="k-card-text">What are the key findings, and how strong is the evidence behind each?</span></div>
+                    <div class="k-card"><span class="k-card-title">Method</span><span class="k-card-text">How was the study done? Describe the design, sample, data and analysis.</span></div>
+                    <div class="k-card"><span class="k-card-title">Where should I read?</span><span class="k-card-text">I want to understand this document well. Which sections should I read closely, in what order, and why?</span></div>
+                  </div>
+                </div>
+                <div class="k-turn" id="turn" style="display:none">
+                  <div class="k-q" id="bubble">How many studies were reviewed, and how were they coded?</div>
+                  <div class="k-a">
+                    <div id="think"><div class="thinking">Thinking</div><div class="think-tail">Looking for the method section and the number of studies screened…</div></div>
+                    <div class="konnash-answer" id="answer"></div>
+                    <div class="konnash-a-footer" id="foot" style="opacity:0">All statements cited</div>
+                    <div class="konnash-a-tools" id="tools" style="opacity:0"><span>Copy</span><span class="hv" id="toolnote">Add to note</span><span>Read right-to-left</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="k-composer">
+              <div class="k-pills" id="pills" style="display:none"><span class="k-pill">Explain</span><span class="k-pill">Simplify</span><span class="k-pill">Connect</span><span class="k-pill">Critique</span></div>
+              <div class="k-box" id="box">
+                <div class="k-box-banner" id="boxbanner" style="display:none"><svg class="k-icon" viewBox="0 0 16 16"><path d="M3 3L7.5 13L9 8.8L13 7.5Z"/></svg>Click a paragraph in the PDF · Esc to cancel</div>
+                <div class="k-box-quote" id="boxquote" style="display:none"><div class="k-quote"><span class="k-quote-meta">Paragraph 14 · 2 Method · p. 4</span><span class="k-quote-text">“We searched five databases for studies published between 2012 and 2022. Of the 412 studies screened, 138 met the criteria for a full review.”</span></div><svg class="k-icon" style="color:#888;margin-top:6px" viewBox="0 0 16 16"><path d="M4.5 4.5L11.5 11.5M11.5 4.5L4.5 11.5"/></svg></div>
+                <div class="k-input ph" id="input">Ask about this document…</div>
+                <div class="k-box-bar">
+                  <span class="k-scope hv" id="scope"></span>
+                  <span class="k-spacer"></span>
+                  <span class="k-send" id="send"><svg viewBox="0 0 16 16"><path d="M8 12.5V3.5M4 7.5L8 3.5L12 7.5"/></svg></span>
+                </div>
+              </div>
+            </div>
+            <div class="konnash-card" id="hcard">
+              <div class="konnash-card-meta">p. 4</div>
+              <div class="konnash-card-quote">Of the 412 studies screened, 138 met the criteria for a full review.</div>
+              <div class="konnash-card-actions"><span class="konnash-card-button">Show in PDF</span><span class="konnash-card-button">Keep as highlight</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav">
+        <b><span></span></b><b><span></span></b><b><span></span></b><b><span></span></b>
+        <div class="sep"></div>
+        <b class="k" id="navk"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2.5h10a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-10z"/><path d="M4.5 2.5v15"/><path d="M7.5 6.5h5M7.5 9h5M7.5 11.5h3"/><path d="M2.5 5h2M2.5 10h2M2.5 15h2"/></svg></b>
+      </div>
+    </div>
+  </div>
+
+  <!-- popovers, toast, note, selection: above the windows -->
+  <div id="selrects"></div>
+  <div class="pop" id="ctxmenu"></div>
+  <div class="pop" id="choose1"></div>
+  <div class="pop" id="choose2"></div>
+  <div class="pop" id="scopepop"></div>
+  <div id="toast"></div>
+  <div id="note">
+    <div class="nbar">Note</div>
+    <h1>Konnash: How many studies were reviewed, and how were they coded?</h1>
+    <h2>How many studies were reviewed, and how were they coded?</h2>
+    <p>The review examined 138 studies in full<sup>1</sup>, from 412 screened<sup>1</sup>. Each was read and coded independently by two readers<sup>2</sup>.</p>
+    <p>Most took place in university settings<sup>3</sup>, and few followed participants beyond one semester.</p>
+    <div class="src">Sources</div>
+    <ol>
+      <li>“Of the 412 studies screened, 138 met the criteria for a full review.” (p. 4)</li>
+      <li>“Each study was read and coded independently by two readers, and disagreements were resolved by discussion.” (p. 4)</li>
+      <li>“Most of the studies took place in university settings, and few reported follow-up beyond one semester.” (p. 4)</li>
+    </ol>
+  </div>
+
+  <div id="caption"></div>
+  <div id="maxims"></div>
+  <div class="card" id="outro"><img src="../icon.png" alt="" /><h1>Konnash</h1><p class="slogan">AI for Scholars</p></div>
+  <div id="ripple"></div>
+  <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2.5 L4 19 L8.3 15 L11.2 21.5 L14 20.2 L11.2 13.9 L17 13.9 Z" fill="#fff" stroke="#222" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = (x) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+const ramp = (t, a, b) => ease(clamp((t - a) / (b - a)));
+const win = (t, a, b, f = 0.4) => Math.min(ramp(t, a, a + f), 1 - ramp(t, b - f, b));
+const between = (t, a, b) => t >= a && t < b;
+const DURATION = 70;
+
+// ------------------------------------------------------------------ the story, in seconds
+// 0–3.5 title · 3.3–15 install · 15–40 ask and cite · 40–51 notes · 51–62 three ways to ask · 63–67 two lines · 67–70 name
+const OFF = 12.0; // the reading part was drawn first, from 0: this moves it into place
+const NEWCHAT = 52.4;
+
+const QUESTION = "How many studies were reviewed, and how were they coded?";
+const ANSWER = [
+  [{ s: "The review examined 138 studies in full" }, { c: 1 }, { s: ", from 412 screened" }, { c: 1 }, { s: ". Each was read and coded independently by two readers" }, { c: 2 }, { s: "." }],
+  [{ s: "Most took place in university settings" }, { c: 3 }, { s: ", and few followed participants beyond one semester." }],
+];
+const CAPTIONS = [
+  [3.9, 6.4, "Open Tools → Plugins."],
+  [6.6, 10.7, "Install Plugin From File…, then choose konnash.xpi."],
+  [10.9, 15.0, "In Settings → Konnash, choose a provider and add your key."],
+  [15.7, 18.3, "Open a PDF in Zotero."],
+  [18.5, 21.2, "Konnash opens beside it."],
+  [21.4, 25.3, "Ask about the document you are reading."],
+  [25.9, 31.2, "Every answer points back to the text it comes from."],
+  [31.6, 34.5, "Hover a number to read the passage."],
+  [34.9, 39.6, "Click it, and the sentences light up in the PDF."],
+  [40.6, 45.2, "Select any part of a conversation, and add it to a note."],
+  [45.7, 48.2, "Or a whole answer, with its sources."],
+  [48.4, 51.2, "It lands in your note, sources included."],
+  [53.0, 56.4, "Ask of the whole document, or of its most relevant sections…"],
+  [56.8, 62.3, "…or of one passage you point at in the PDF."],
+];
+const MAXIMS = ["The reading stays yours.", "Every claim has its place."];
+const MAXIM_AT = [63.6, 64.9];
+
+// The cursor: [time, target, dx, dy]; a target is an element id or [x, y] in the stage
+const PATH = [
+  [4.0, [900, 420]],
+  [4.6, "m-tools"], [4.95, "m-tools"],
+  [5.7, "mi-plugins"], [6.1, "mi-plugins"],
+  [7.0, "gear"], [7.4, "gear"],
+  [8.1, "gear-install"], [8.5, "gear-install"],
+  [9.2, "dlg-file"], [9.35, "dlg-file"],
+  [9.95, "dlg-open"], [10.05, "dlg-open"],
+  [11.3, "provbox"], [11.55, "provbox"],
+  [11.9, "pv-0"], [12.9, "pv-7"],
+  [13.4, "keybox", 80, 0], [13.6, "keybox", 80, 0],
+  [17.4, [1300, 700]],
+  [18.6, "navk"], [18.9, "navk"],
+  [20.4, [1290, 640]],
+  [21.5, "card-findings", 60, 20], [22.1, "card-findings", 60, 20],
+  [22.6, "input", 120, 10],
+  [25.0, "input", 150, 10], [25.3, "send"], [25.5, "send"],
+  [26.2, [1380, 660]],
+  [31.0, [1380, 560]],
+  [31.8, "cite1"], [34.3, "cite1"],
+  [36.5, "cite2"], [37.0, "cite2"],
+  [38.4, [1400, 640]],
+  [40.5, "bubble", -190, -8], [40.9, "bubble", -190, -8],
+  [42.3, "cite2", 22, 2], [42.7, "cite2", 22, 2],
+  [43.4, "ctx-add"], [43.9, "ctx-add"],
+  [44.5, "ch1-new"], [45.0, "ch1-new"],
+  [45.8, "toolnote"], [46.4, "toolnote"],
+  [47.0, "ch2-1"], [47.5, "ch2-1"],
+  [48.8, [1100, 880]],
+  [51.5, "newbtn"], [52.4, "newbtn"],
+  [53.2, "scope", -60, 0], [53.5, "scope", -60, 0],
+  [54.2, "sp-0"], [54.9, "sp-1"], [55.4, "sp-1"],
+  [56.9, "scope", -60, 0], [57.4, "scope", -60, 0],
+  [58.1, "sp-2"], [58.5, "sp-2"],
+  [59.4, "mp", 0, -10], [60.2, "mp", 0, -10],
+  [61.6, [1000, 880]],
+];
+const CLICKS = [4.95, 6.1, 7.4, 8.5, 9.35, 10.05, 11.55, 13.5, 18.9, 25.45, 34.35, 37.05, 42.7, 43.9, 45.0, 46.4, 47.5, 52.4, 53.5, 55.4, 57.4, 58.5, 60.2];
+
+const centre = (el, dx = 0, dy = 0) => {
+  const r = el.getBoundingClientRect();
+  return [r.left + r.width / 2 + dx, r.top + r.height / 2 + dy];
+};
+function cursorAt(t) {
+  const pts = PATH.map(([time, target, dx, dy]) => [time, Array.isArray(target) ? target : centre($(target), dx || 0, dy || 0)]);
+  if (t < pts[0][0] || t > pts[pts.length - 1][0]) return null;
+  let a = pts[0], b = pts[0];
+  for (let i = 0; i < pts.length; i++) {
+    if (t >= pts[i][0]) { a = pts[i]; b = pts[Math.min(i + 1, pts.length - 1)]; }
+  }
+  const k = a === b || b[0] === a[0] ? 1 : ease(clamp((t - a[0]) / (b[0] - a[0])));
+  return [a[1][0] + (b[1][0] - a[1][0]) * k, a[1][1] + (b[1][1] - a[1][1]) * k];
+}
+
+// ------------------------------------------------------------------ build
+const ICONS = {
+  document: ["M4 2.5H9.5L12 5V13.5H4Z", "M9.5 2.5V5H12", "M6 8H10", "M6 10.5H10"],
+  focus: ["M8 2.5A5.5 5.5 0 1 1 7.99 2.5Z", "M8 5.5A2.5 2.5 0 1 1 7.99 5.5Z", "M8 7.9V8.1"],
+  passage: ["M3 4.5H13", "M3 7.5H13", "M3 10.5H9", "M11.5 9.5V13", "M10 11.5H13"],
+  pick: ["M3 3L7.5 13L9 8.8L13 7.5Z"],
+  note: ["M3.5 2.5H12.5V10L9.5 13.5H3.5Z", "M9.5 13.5V10H12.5", "M5.5 6H10.5", "M5.5 8.5H8.5"],
+  plus: ["M8 3.5V12.5", "M3.5 8H12.5"],
+  copy: ["M5.5 5.5H12.5V13.5H5.5Z", "M3.5 10.5V2.5H10.5"],
+};
+const svg = (name, cls = "") => `<svg class="k-icon ${cls}" viewBox="0 0 16 16">${ICONS[name].map((d) => `<path d="${d}"/>`).join("")}</svg>`;
+function fillPop(box, ids, items) {
+  box.innerHTML = items
+    .map((it, i) => (it === "-" ? '<div class="psep"></div>' : `<div class="pi hv${it.sel ? " sel" : ""}" id="${ids}-${i}">${svg(it.icon)}<div class="tx"><div class="l">${it.label}</div>${it.desc ? `<div class="d">${it.desc}</div>` : ""}</div></div>`))
+    .join("");
+}
+const NOTE_TITLE = "Konnash: How many studies were reviewed, and how were they coded?";
+fillPop($("ctxmenu"), "ctx", [{ icon: "copy", label: "Copy", desc: "With the sources it cites" }, { icon: "note", label: "Add to note…", desc: "One of this item's notes, or a new one" }]);
+$("ctx-1").id = "ctx-add";
+fillPop($("choose1"), "ch1", [{ icon: "plus", label: "New note", desc: "On this item" }, "-", { icon: "note", label: "Reading notes", desc: "Changed 11/9/2026" }]);
+$("ch1-0").id = "ch1-new";
+fillPop($("choose2"), "ch2", [{ icon: "plus", label: "New note", desc: "On this item" }, "-", { icon: "note", label: NOTE_TITLE, desc: "Changed today", sel: true }, { icon: "note", label: "Reading notes", desc: "Changed 11/9/2026" }]);
+$("ch2-2").id = "ch2-1";
+fillPop($("scopepop"), "sp", [
+  { icon: "document", label: "Whole document", desc: "The model reads the entire document." },
+  { icon: "focus", label: "Most relevant sections", desc: "Focus: a quick ranking picks the sections that matter.<br>You'll see which, and why." },
+  { icon: "passage", label: "A passage…", desc: "Click a paragraph in the PDF to ask about it." },
+]);
+// fillPop numbers the separator too: the three scope items are 0, 1, 2
+["ctxmenu", "choose1", "choose2", "scopepop"].forEach((id) => ($(id).style.width = id === "scopepop" ? "410px" : id === "ctxmenu" ? "330px" : "390px"));
+
+const PROVIDERS = ["Anthropic", "DeepSeek", "Google Gemini", "OpenAI", "OpenRouter", "LM Studio (local)", "Ollama (local)", "Other OpenAI-compatible"];
+$("provlist").innerHTML = PROVIDERS.map((p, i) => `<div class="di hv" id="pv-${i}"><span>${p}</span></div>`).join("");
+
+const answer = $("answer");
+const cites = {};
+ANSWER.forEach((para) => {
+  const p = document.createElement("p");
+  answer.append(p);
+  para.forEach((piece) => {
+    if (piece.s) {
+      const span = document.createElement("span");
+      span.dataset.text = piece.s;
+      p.append(span);
+    } else {
+      const sup = document.createElement("sup");
+      sup.className = "konnash-cite";
+      sup.textContent = String(piece.c);
+      p.append(sup);
+      const key = "cite" + piece.c;
+      if (!cites[key]) { sup.id = key; cites[key] = sup; }
+    }
+  });
+});
+const answerNodes = [...answer.querySelectorAll("span, sup")];
+const totalChars = answerNodes.reduce((n, node) => n + (node.dataset.text ? node.dataset.text.length : 1), 0);
+
+const mx = $("maxims");
+MAXIMS.forEach((text) => { const d = document.createElement("div"); d.className = "maxim"; d.textContent = text; mx.append(d); });
+
+// ------------------------------------------------------------------ helpers
+/** A popover sits against an anchor: above it, or below it */
+function place(box, anchor, host, where, dx = 0) {
+  const a = anchor.getBoundingClientRect(), h = host.getBoundingClientRect();
+  box.style.left = `${a.left - h.left + dx}px`;
+  box.style.top = where === "above" ? `${a.top - h.top - box.offsetHeight - 8}px` : `${a.bottom - h.top + 6}px`;
+}
+/** The rectangles of a selection that grows from the start of the question to a point in the first answer paragraph */
+function selection(progress) {
+  const host = $("selrects");
+  host.innerHTML = "";
+  if (progress <= 0) return;
+  const nodes = [$("bubble").firstChild];
+  const walker = document.createTreeWalker(answer.querySelector("p"), NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) nodes.push(n);
+  const total = nodes.reduce((s, n) => s + n.length, 0);
+  let left = Math.floor(progress * total);
+  for (const node of nodes) {
+    if (left <= 0) break;
+    const take = Math.min(left, node.length);
+    left -= take;
+    const r = document.createRange();
+    r.setStart(node, 0);
+    r.setEnd(node, take);
+    for (const rect of r.getClientRects()) {
+      if (rect.width < 1) continue;
+      const d = document.createElement("div");
+      d.className = "selrect";
+      d.style.cssText = `left:${rect.left}px;top:${rect.top + 2}px;width:${rect.width}px;height:${rect.height - 4}px`;
+      host.append(d);
+    }
+  }
+}
+
+// ------------------------------------------------------------------ render
+function renderAt(t) {
+  const l = t - OFF; // the reading part's own clock
+  const stage = $("stage");
+
+  // titles
+  $("intro").style.opacity = String(t < 0.9 ? ramp(t, 0.1, 0.9) : t > 2.9 ? 1 - ramp(t, 2.9, 3.5) : 1);
+
+  // ---- install
+  $("inst").style.opacity = String(ramp(t, 3.3, 3.9) * (1 - ramp(t, 15.0, 15.6)));
+  $("inst").style.transform = `translateY(${(1 - ramp(t, 3.3, 3.9)) * 16}px)`;
+  $("scrA").style.opacity = String(t < 6.1 ? 1 : 1 - ramp(t, 6.1, 6.4));
+  $("scrB").style.opacity = String(t < 6.1 ? 0 : t < 10.7 ? ramp(t, 6.1, 6.4) : 1 - ramp(t, 10.7, 11.0));
+  $("scrC").style.opacity = String(t < 10.7 ? 0 : 1);
+  $("m-tools").classList.toggle("on", between(t, 4.95, 6.1));
+  $("toolsmenu").style.opacity = String(win(t, 4.95, 6.2, 0.15));
+  place($("toolsmenu"), $("m-tools"), $("scrA"), "below");
+  $("gear").classList.toggle("on", between(t, 7.4, 8.55));
+  $("gearmenu").style.opacity = String(win(t, 7.4, 8.6, 0.15));
+  $("filedlg").style.opacity = String(win(t, 8.5, 10.1, 0.2));
+  document.querySelectorAll("#filedlg .ff").forEach((f) => f.classList.toggle("sel", f.id === "dlg-file" && t >= 9.35));
+  const row = ramp(t, 10.1, 10.7);
+  const pr = $("plugrow");
+  pr.style.maxHeight = `${96 * row}px`;
+  pr.style.opacity = String(row);
+  pr.style.borderWidth = row > 0 ? "1px" : "0";
+  $("provlist").style.opacity = String(win(t, 11.55, 13.3, 0.15));
+  $("provtext").innerHTML = t >= 13.3 ? '<span class="skbar"></span>' : "Choose a provider…";
+  const keyTyped = clamp(Math.floor((t - 13.7) * 20), 0, 26);
+  $("keybox").classList.toggle("focus", t >= 13.5);
+  $("keybox").textContent = "•".repeat(keyTyped);
+
+  // ---- reading: the window, the panel, the question, the answer
+  const wIn = ramp(t, 15.2, 15.9), wOut = ramp(t, 62.6, 63.3);
+  $("win").style.opacity = String(wIn * (1 - wOut));
+  $("win").style.transform = `translateY(${(1 - wIn) * 16}px) scale(${0.985 + 0.015 * wIn})`;
+
+  const open = ramp(l, 6.95, 7.6);
+  $("side").style.width = `${560 * open}px`;
+  $("panelwrap").style.opacity = String(clamp(open * 1.4));
+  $("navk").classList.toggle("on", l >= 6.9);
+  $("page").style.left = `${(1700 - 52 - 560 * open) / 2}px`;
+
+  const chatting = l >= 13.45 && t < NEWCHAT;
+  $("empty").style.display = chatting ? "none" : "block";
+  $("turn").style.display = chatting ? "flex" : "none";
+  $("headtitle").innerHTML = chatting
+    ? `<span class="t">${QUESTION}</span>`
+    : 'Konnash<span class="k-tagline">AI for Scholars</span>';
+  document.querySelectorAll(".k-card").forEach((c) => c.classList.remove("hover"));
+  if (!chatting && between(l, 9.4, 10.5)) $("card-findings").classList.add("hover");
+
+  // scope: what the question is about
+  const mode = t < 55.4 ? "document" : t < 58.5 ? "focus" : t < 60.2 ? "picking" : "passage";
+  const SCOPE = {
+    document: ["document", "Whole document", false],
+    focus: ["focus", "Relevant sections", true],
+    picking: ["pick", "Pick a paragraph…", true],
+    passage: ["passage", "Passage · Paragraph 14", true],
+  }[mode];
+  $("scope").innerHTML = `${svg(SCOPE[0])}<span>${SCOPE[1]}</span><svg class="k-icon" style="width:11px;height:11px" viewBox="0 0 16 16"><path d="M4 6L8 10L12 6"/></svg>`;
+  $("scope").classList.toggle("on", SCOPE[2]);
+  $("pills").style.display = mode === "passage" ? "flex" : "none";
+  $("boxbanner").style.display = mode === "picking" ? "flex" : "none";
+  $("boxquote").style.display = mode === "passage" ? "flex" : "none";
+
+  // composer: typing the first question, then the placeholder that goes with the scope
+  const typed = clamp(Math.floor((l - 10.7) * 24), 0, QUESTION.length);
+  const input = $("input");
+  const typing = between(l, 10.7, 13.45);
+  if (typing) {
+    input.classList.remove("ph");
+    input.innerHTML = "";
+    input.append(document.createTextNode(QUESTION.slice(0, typed)));
+    const caret = document.createElement("span");
+    caret.className = "caret";
+    caret.style.opacity = Math.floor(t * 2.2) % 2 ? "0" : "1";
+    input.append(caret);
+  } else {
+    input.classList.add("ph");
+    input.textContent = mode === "focus" ? "Ask a question; Konnash will pick the relevant sections…" : mode === "passage" ? "Ask about this passage — or press Enter to explain it" : "Ask about this document…";
+  }
+  $("box").classList.toggle("focus", typing);
+  $("send").classList.toggle("on", (typing && typed > 3) || mode === "passage");
+
+  const bIn = ramp(l, 13.5, 13.9);
+  $("bubble").style.opacity = String(bIn);
+  $("bubble").style.transform = `translateY(${(1 - bIn) * 10}px)`;
+
+  const thinking = between(l, 13.95, 15.3);
+  $("think").style.display = thinking ? "block" : "none";
+  if (thinking) {
+    $("think").firstChild.textContent = "Thinking" + ".".repeat(1 + (Math.floor(t * 3) % 3));
+    $("think").style.opacity = String(ramp(l, 13.95, 14.3));
+  }
+  const reveal = clamp(Math.floor((l - 15.3) * 58), 0, totalChars);
+  let used = 0;
+  for (const node of answerNodes) {
+    if (node.dataset.text) {
+      node.textContent = node.dataset.text.slice(0, clamp(reveal - used, 0, node.dataset.text.length));
+      used += node.dataset.text.length;
+    } else {
+      node.style.visibility = reveal > used ? "visible" : "hidden";
+      used += 1;
+    }
+  }
+  const doneAt = 15.3 + totalChars / 58;
+  $("foot").style.opacity = String(reveal >= totalChars ? ramp(l, doneAt, doneAt + 0.4) : 0);
+  $("tools").style.opacity = $("foot").style.opacity;
+
+  // citations: hover card, then the PDF
+  const c1 = cites.cite1, c2 = cites.cite2;
+  c1.classList.toggle("hover", between(l, 19.9, 22.4));
+  c1.classList.toggle("active", between(l, 22.4, 25.0));
+  c2.classList.toggle("active", l >= 25.0);
+  const hc = $("hcard");
+  const hcA = win(l, 19.9, 22.55, 0.25);
+  hc.style.opacity = String(hcA);
+  if (hcA > 0) {
+    const wrap = $("panelwrap").getBoundingClientRect(), s = c1.getBoundingClientRect();
+    hc.style.left = `${clamp(s.left - wrap.left - 120, 18, 44)}px`;
+    hc.style.top = `${s.bottom - wrap.top + 10}px`;
+  }
+  const scroll = ramp(l, 22.45, 23.6);
+  $("page").style.transform = `translateY(${-640 * scroll}px)`;
+  const fade = 1 - ramp(t, 40.0, 40.7); // the highlights let go as the notes begin
+  const ctx = ramp(l, 23.4, 24.0) * fade;
+  const first = ramp(l, 23.5, 24.0) * (1 - ramp(l, 25.0, 25.4)) * fade;
+  const second = ramp(l, 25.0, 25.5) * fade;
+  document.querySelectorAll("#page .ctx").forEach((n) => (n.style.backgroundColor = `rgba(143,122,230,${0.14 * ctx})`));
+  $("s1").style.backgroundColor = `rgba(143,122,230,${0.5 * first})`;
+  $("s2").style.backgroundColor = `rgba(143,122,230,${0.5 * second})`;
+  $("s3").style.backgroundColor = "rgba(143,122,230,0)";
+  // a paragraph picked to ask about
+  const mpHover = between(t, 59.0, 60.2) ? 0.1 : 0;
+  const mpPicked = ramp(t, 60.2, 60.6) * 0.2;
+  $("mp").style.backgroundColor = `rgba(143,122,230,${mpHover + mpPicked})`;
+  $("mp").style.boxShadow = mpPicked > 0 ? `0 0 0 4px rgba(143,122,230,${mpPicked})` : "none";
+
+  // ---- notes
+  selection(t < 45.05 ? ramp(t, 40.9, 42.3) : 0);
+  const ctxP = $("ctxmenu"), c2P = $("choose1");
+  ctxP.style.opacity = String(win(t, 42.7, 44.0, 0.15));
+  c2P.style.opacity = String(win(t, 43.9, 45.1, 0.15));
+  const at = centre(c2, 24, 20);
+  for (const box of [ctxP, c2P]) { box.style.left = `${Math.min(at[0], 1470)}px`; box.style.top = `${at[1]}px`; }
+  place($("choose2"), $("toolnote"), stage, "above");
+  $("choose2").style.opacity = String(win(t, 46.4, 47.6, 0.15));
+  $("toolnote").classList.toggle("hover", between(t, 46.0, 46.4));
+  const toast = $("toast");
+  const toastA = Math.max(win(t, 45.05, 47.0, 0.25), win(t, 47.55, 49.5, 0.25));
+  toast.textContent = t < 47.3 ? "Added to a new note on this item." : "Added to “Konnash: How many studies were reviewed…”.";
+  toast.style.opacity = String(toastA);
+  const nA = win(t, 47.9, 51.3, 0.5);
+  $("note").style.opacity = String(nA);
+  $("note").style.transform = `translateY(${(1 - nA) * 26}px)`;
+
+  // ---- three ways to ask
+  const sp = $("scopepop");
+  sp.style.opacity = String(Math.max(win(t, 53.5, 55.5, 0.15), win(t, 57.4, 58.55, 0.15)));
+  place(sp, $("scope"), stage, "above");
+  document.querySelectorAll("#scopepop .pi").forEach((p, i) => p.classList.toggle("sel", (i === 0 && t < 55.4) || (i === 1 && t >= 57.4 && t < 58.5)));
+
+  // ---- captions
+  let caption = null, alpha = 0;
+  for (const [a, b, text] of CAPTIONS) {
+    const v = win(t, a, b, 0.4);
+    if (v > alpha) { alpha = v; caption = text; }
+  }
+  if (caption) $("caption").textContent = caption;
+  $("caption").style.opacity = String(alpha);
+  $("caption").style.transform = `translateY(${(1 - alpha) * 6}px)`;
+
+  // ---- cursor, hover states, clicks
+  const pos = cursorAt(t);
+  document.querySelectorAll(".hv").forEach((n) => n.classList.remove("hover"));
+  if (pos) {
+    for (const n of document.querySelectorAll(".hv")) {
+      const owner = n.closest(".pop, .dd, #filedlg") || n.closest(".scr, #win");
+      if (owner && parseFloat(owner.style.opacity || "1") < 0.6) continue;
+      const r = n.getBoundingClientRect();
+      if (pos[0] >= r.left && pos[0] <= r.right && pos[1] >= r.top && pos[1] <= r.bottom) n.classList.add("hover");
+    }
+  }
+  const cs = $("cursor");
+  if (pos) {
+    cs.style.opacity = String(ramp(t, 4.0, 4.4) * (1 - ramp(t, 61.8, 62.4)));
+    cs.style.transform = `translate(${pos[0] - 4}px, ${pos[1] - 3}px)`;
+  } else cs.style.opacity = "0";
+  const rip = $("ripple");
+  rip.style.opacity = "0";
+  for (const c of CLICKS) {
+    if (pos && t >= c && t < c + 0.5) {
+      const k = (t - c) / 0.5;
+      rip.style.left = `${pos[0]}px`;
+      rip.style.top = `${pos[1]}px`;
+      rip.style.opacity = String(0.8 * (1 - k));
+      rip.style.transform = `scale(${1 + k * 2.4})`;
+    }
+  }
+
+  // ---- closing: two lines, then the name
+  mx.style.opacity = String(ramp(t, 63.2, 63.6) * (1 - ramp(t, 66.4, 67.0)));
+  [...mx.children].forEach((d, i) => (d.style.opacity = String(ramp(t, MAXIM_AT[i], MAXIM_AT[i] + 0.8))));
+  $("outro").style.opacity = String(ramp(t, 66.8, 67.6));
+}
+window.renderAt = renderAt;
+window.DURATION = DURATION;
+window.ready = document.fonts.ready.then(() => true);
+renderAt(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<vbox
+  class="konnash-prefs"
+  onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window })"
+>
+  <html:div class="kp-card kp-about">
+    <html:h2>Konnash</html:h2>
+    <html:p class="kp-slogan">AI for Scholars</html:p>
+    <html:p class="kp-help">
+      Ask about the document open beside you. Every answer points to the sentences it comes from.
+    </html:p>
+    <html:ul class="kp-principles">
+      <html:li><html:b>The reading stays yours.</html:b> Konnash sends you back to the text. It does not read for you.</html:li>
+      <html:li><html:b>Every claim has its place.</html:b> Answers cite exact sentences. Anything uncited is marked.</html:li>
+    </html:ul>
+  </html:div>
+
+  <html:div class="kp-card">
+    <html:h2>Responsible use</html:h2>
+    <html:p class="kp-help">
+      To answer, Konnash sends the document you are reading and your question to the AI provider you
+      choose. Whether you may send a document, under its licence, is for you to check; the choice is yours.
+    </html:p>
+    <html:ul class="kp-principles">
+      <html:li>Tag an item <html:code>no-ai</html:code> to be reminded before asking about it. The reminder can be closed.</html:li>
+      <html:li>Answers can be wrong. The citations are there so you can check them in the text.</html:li>
+    </html:ul>
+  </html:div>
+
+  <html:div class="kp-card">
+    <html:h2>AI provider</html:h2>
+    <html:p class="kp-help">
+      Konnash sends only the PDF you are reading and your question to the provider you
+      choose. Your API key is stored in Zotero's preferences on this computer.
+    </html:p>
+    <html:div class="kp-row">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-provider">Provider</html:label>
+      <menulist id="zotero-prefpane-__addonRef__-provider" preference="provider" native="true">
+        <menupopup>
+          <menuitem label="Choose a provider…" value="" />
+          <menuitem label="Anthropic" value="anthropic" />
+          <menuitem label="DeepSeek" value="deepseek" />
+          <menuitem label="Google Gemini" value="gemini" />
+          <menuitem label="OpenAI" value="openai" />
+          <menuitem label="OpenRouter" value="openrouter" />
+          <menuitem label="LM Studio (local)" value="lmstudio" />
+          <menuitem label="Ollama (local)" value="ollama" />
+          <menuitem label="Other OpenAI-compatible" value="custom" />
+        </menupopup>
+      </menulist>
+    </html:div>
+    <html:p id="zotero-prefpane-__addonRef__-tier" class="kp-note"></html:p>
+    <html:div class="kp-row">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-apiKey">API key</html:label>
+      <html:input type="password" id="zotero-prefpane-__addonRef__-apiKey" class="kp-input" preference="apiKey" />
+    </html:div>
+    <html:div class="kp-row">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-baseURL">Endpoint</html:label>
+      <html:input type="text" id="zotero-prefpane-__addonRef__-baseURL" class="kp-input" preference="baseURL" />
+    </html:div>
+    <html:p class="kp-help">Leave Endpoint empty to use the provider's default address.</html:p>
+  </html:div>
+
+  <html:div class="kp-card">
+    <html:h2>Models</html:h2>
+    <html:div class="kp-row">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-model-select">Model</html:label>
+      <html:select id="zotero-prefpane-__addonRef__-model-select" class="kp-input"></html:select>
+      <html:button id="zotero-prefpane-__addonRef__-refresh" class="kp-button">Refresh</html:button>
+    </html:div>
+    <html:div class="kp-row" id="zotero-prefpane-__addonRef__-model-custom-row" hidden="true">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-model-custom">Model name</html:label>
+      <html:input type="text" id="zotero-prefpane-__addonRef__-model-custom" class="kp-input" />
+    </html:div>
+    <html:div class="kp-row">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-helper-select">Helper model</html:label>
+      <html:select id="zotero-prefpane-__addonRef__-helper-select" class="kp-input"></html:select>
+    </html:div>
+    <html:p id="zotero-prefpane-__addonRef__-models-status" class="kp-help">
+      The helper model does small background jobs (section summaries and Focus ranking).
+      Unless you choose one, the main model does them.
+    </html:p>
+    <html:div class="kp-row" id="zotero-prefpane-__addonRef__-effort-row">
+      <html:label class="kp-label" for="zotero-prefpane-__addonRef__-effort">Effort</html:label>
+      <menulist id="zotero-prefpane-__addonRef__-effort" preference="effort" native="true">
+        <menupopup>
+          <menuitem label="Low (fastest, cheapest)" value="low" />
+          <menuitem label="Medium" value="medium" />
+          <menuitem label="High" value="high" />
+          <menuitem label="Extra high" value="xhigh" />
+          <menuitem label="Max (slowest, most thorough)" value="max" />
+        </menupopup>
+      </menulist>
+    </html:div>
+  </html:div>
+
+  <html:div class="kp-card">
+    <html:h2>Suggested prompts</html:h2>
+    <html:p class="kp-help">
+      Konnash recommends these prompts; they are suggestions, not rules. In the panel,
+      clicking one puts it in the question box to edit (Ctrl+click, or ⌘-click on a Mac,
+      sends it at once). The
+      grounding and citation rules always apply, whatever the prompt says.
+    </html:p>
+    <html:div id="zotero-prefpane-__addonRef__-prompts"></html:div>
+  </html:div>
+
+  <html:div class="kp-card">
+    <html:h2>Your data</html:h2>
+    <html:p class="kp-help">
+      Conversations are saved on this computer only, in the folder below. They are not
+      synced and are not part of Zotero's own backup. Deleted conversations stay in Trash
+      for 30 days, and a daily copy of each file is kept for 14 days. To keep something in
+      Zotero itself (synced and backed up), use "Save conversation as note" or "Keep as
+      highlight".
+    </html:p>
+    <html:div class="kp-row">
+      <html:code id="zotero-prefpane-__addonRef__-data-path" class="kp-path"></html:code>
+      <html:button id="zotero-prefpane-__addonRef__-data-show" class="kp-button">Show folder</html:button>
+    </html:div>
+    <html:h3 class="kp-subhead">From another computer</html:h3>
+    <html:p class="kp-help">
+      Copy the konnash folder from the other computer's Zotero data folder (shown above on that
+      computer), then choose it here. Each conversation joins the same PDF in this library, even
+      when Zotero gave it another key, and is merged with yours: nothing is replaced or lost. Your
+      files here are backed up first.
+    </html:p>
+    <html:div class="kp-row">
+      <html:button id="zotero-prefpane-__addonRef__-import" class="kp-button">Import conversations…</html:button>
+    </html:div>
+    <html:div id="zotero-prefpane-__addonRef__-import-report" class="kp-report" hidden="true"></html:div>
+  </html:div>
+</vbox>

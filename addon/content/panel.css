@@ -1,0 +1,1391 @@
+/* Konnash panel — lives inside a shadow root, so Zotero's global styles
+   don't reach it. Colours come from Zotero's own theme variables, which
+   inherit through the shadow boundary, so light and dark both follow
+   Zotero. Bundled into the plugin script (never a stale cached file). */
+
+:host {
+  display: block;
+  min-height: 0;
+  /* The panel is as wide as Zotero's pane, never as wide as what it holds:
+     Zotero's pane can't get narrower than its content, so one long title or
+     wide table would otherwise hold the whole pane open (pushing the
+     Notebook's tabs and Zotero's side icons out of sight) */
+  contain: inline-size;
+  color: var(--fill-primary, CanvasText);
+  --k-text: var(--fill-primary, CanvasText);
+  --k-muted: var(--fill-secondary, GrayText);
+  --k-faint: var(--fill-tertiary, GrayText);
+  --k-line: var(--fill-quinary, rgba(127, 127, 127, 0.22));
+  --k-surface: var(--material-background, Canvas);
+  --k-raised: color-mix(in srgb, var(--k-text) 5%, var(--k-surface));
+  --k-hover: color-mix(in srgb, var(--k-text) 8%, transparent);
+  --k-accent: #8f7ae6;
+  --k-accent-soft: color-mix(in srgb, var(--k-accent) 14%, transparent);
+  --k-quote: #9e9e9e;
+  --k-error: #d0533f;
+  --k-radius: 10px;
+  --k-radius-s: 6px;
+  --k-font: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Author display rules would otherwise override the hidden attribute */
+[hidden] {
+  display: none !important;
+}
+
+button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--k-accent);
+  outline-offset: 1px;
+  border-radius: var(--k-radius-s);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+textarea,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+svg.k-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ------------------------------------------------------------- Direction */
+
+/* Arrows and chevrons that point along the line mirror in RTL */
+:dir(rtl) > svg.k-flip {
+  transform: scaleX(-1);
+}
+/* Interface text reads in its own language's direction (English labels
+   in a right-to-left Zotero keep their "…" and punctuation in place),
+   while the layout around it still mirrors */
+:is(.k-menu-label, .k-menu-desc, .k-menu-status, .konnash-a-footer, .konnash-a-tools, .konnash-thinking, summary, .konnash-context-why, .konnash-context-foot, .konnash-context-plain, .k-empty-title, .k-empty-text, .k-empty-hint, .k-empty-small, .k-banner, .k-toast > span, .k-hl-label, .k-scope-label, .k-box-banner, .k-row-meta, .k-quote-meta, .konnash-card-meta, .k-section-label, .k-error, .k-q-label) {
+  unicode-bidi: plaintext;
+}
+/* …and, sized to its text, sits on the layout's start side */
+:is(.konnash-a-footer, .konnash-a-tools, .konnash-thinking, .konnash-context-why, .konnash-context-foot, .konnash-context-plain, .k-empty-title, .k-empty-text, .k-empty-hint, .k-empty-small, .k-row-meta, .k-quote-meta, .konnash-card-meta, .k-section-label, .k-error) {
+  width: fit-content;
+  max-width: 100%;
+}
+.k-menu-text {
+  align-items: flex-start;
+}
+.k-menu-row .k-menu-label {
+  flex: none;
+  margin-inline-end: auto;
+}
+/* Citation numbers and code keep to themselves inside RTL text */
+sup.konnash-cite,
+sup.konnash-cite-sep,
+.konnash-answer code {
+  unicode-bidi: isolate;
+}
+/* Arabic and Hebrew script: taller lines, and no synthetic italics (the
+   scripts have none; a slanted Arabic is hard to read) */
+:is(.konnash-answer, .k-q, .k-input, .k-quote, .konnash-card-quote, .konnash-think-body):dir(rtl) {
+  line-height: 1.8;
+}
+:is(.konnash-answer em, .k-quote-text, .k-row-snippet, .konnash-context-reason, .konnash-think-body):dir(rtl) {
+  font-style: normal;
+}
+.konnash-answer em:dir(rtl) {
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------- Layout */
+
+.k-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  min-height: 420px;
+  max-height: 78vh;
+  font-size: var(--k-font);
+  line-height: 1.6;
+  position: relative;
+}
+/* Filling the pane: exactly its height, however short. With the reader's
+   side pane at the bottom (narrow or portrait windows) a minimum height
+   pushed the question box's buttons out of sight; the conversation scrolls
+   above the question box instead */
+:host(.k-fill) .k-panel {
+  min-height: 0;
+  max-height: none;
+}
+
+.k-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 0 8px;
+  border-bottom: 1px solid var(--k-line);
+  font-size: 13px;
+  line-height: 1.3;
+}
+.k-head-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.k-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--k-radius-s);
+  color: var(--k-muted);
+}
+.k-iconbtn:hover:not(:disabled),
+.k-iconbtn.k-active {
+  color: var(--k-text);
+  background: var(--k-hover);
+}
+.k-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 4px;
+  padding-inline: 4px 8px;
+  border-radius: var(--k-radius-s);
+  font-weight: 600;
+}
+.k-back:hover {
+  background: var(--k-hover);
+}
+
+.k-body {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  /* Room on the scrollbar's side: overlay scrollbars float over the text */
+  padding-block: 8px 16px;
+  padding-inline: 2px 12px;
+  scrollbar-gutter: stable;
+  /* Long words and URLs wrap instead of widening the pane */
+  overflow-wrap: anywhere;
+}
+
+.k-banner {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: var(--k-radius-s);
+  background: color-mix(in srgb, #d4a017 14%, transparent);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.k-banner button {
+  text-decoration: underline;
+  margin-inline-start: 6px;
+}
+
+/* ------------------------------------------------------------- Empty state */
+
+.k-empty {
+  padding: 20px 0 8px;
+}
+.k-empty-title {
+  font-size: 1.08em;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.k-empty-text {
+  color: var(--k-muted);
+  font-size: 0.92em;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.k-tagline {
+  color: var(--k-faint);
+  font-weight: 400;
+}
+.k-tagline::before {
+  content: "·";
+  margin-inline-end: 6px;
+}
+.k-cards {
+  display: grid;
+  /* Never wider than the pane, however narrow it is */
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
+  gap: 8px;
+}
+.k-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 108px;
+  padding: 12px 13px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius);
+  background: var(--k-raised);
+  line-height: 1.35;
+  transition: border-color 0.12s, background 0.12s;
+}
+.k-card:hover {
+  border-color: var(--k-accent);
+  background: var(--k-accent-soft);
+}
+.k-card-title {
+  font-weight: 600;
+  font-size: 0.95em;
+}
+.k-card-text {
+  color: var(--k-muted);
+  font-size: 0.82em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.k-empty-hint {
+  margin-top: 14px;
+  color: var(--k-faint);
+  font-size: 0.82em;
+  line-height: 1.45;
+}
+
+/* ------------------------------------------------------------- Stream */
+
+.k-turn {
+  padding: 14px 0 6px;
+  border-top: 1px solid var(--k-line);
+}
+.k-turn:first-child {
+  border-top: none;
+  padding-top: 4px;
+}
+.k-turn.k-flash {
+  animation: k-flash 1.6s ease-out;
+}
+@keyframes k-flash {
+  0% {
+    background: var(--k-accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+.k-quote {
+  display: block;
+  margin: 0 0 6px;
+  padding: 5px 10px;
+  border-inline-start: 3px solid var(--k-quote);
+  border-radius: var(--k-radius-s);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  background: color-mix(in srgb, var(--k-quote) 9%, transparent);
+  font-size: 0.86em;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.k-quote:hover {
+  background: color-mix(in srgb, var(--k-quote) 16%, transparent);
+}
+.k-quote-meta {
+  display: block;
+  color: var(--k-muted);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+.k-quote-text {
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* What you asked: a soft bubble on your side, so it never reads as part of
+   the answer under it */
+.k-turn {
+  display: flex;
+  flex-direction: column;
+}
+.k-q {
+  align-self: flex-end;
+  max-width: 92%;
+  padding: 7px 12px;
+  border-radius: 14px;
+  background: var(--k-accent-soft);
+  white-space: pre-wrap;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.k-q-tag {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+/* Past a few lines, a question folds */
+.k-q-text.k-fold {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.k-more {
+  display: block;
+  width: fit-content;
+  margin-top: 4px;
+  color: var(--k-accent);
+  font-size: 0.86em;
+  white-space: normal;
+}
+.k-more:hover {
+  text-decoration: underline;
+}
+.k-q-label {
+  display: inline-block;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--k-accent-soft);
+  color: var(--k-accent);
+  font-size: 0.86em;
+}
+.k-a {
+  margin-top: 6px;
+}
+.k-error {
+  color: var(--k-error);
+  font-size: 0.92em;
+}
+
+/* What is read can be selected, copied and dragged into a note, across
+   questions and answers. Zotero's window turns selection off for its own
+   chrome, and that reaches the panel unless the conversation turns it back
+   on; buttons and status lines stay out of a selection */
+.k-stream,
+.konnash-card-quote,
+.k-box-quote .k-quote {
+  user-select: text;
+}
+.k-stream :is(button, summary, .konnash-a-tools, .konnash-a-footer, .konnash-context) {
+  user-select: none;
+}
+
+/* Answer text: one rhythm for every block, quiet structure */
+.konnash-answer {
+  /* As wide as the pane, like the question box: with the reader's side pane
+     at the bottom (narrow or portrait windows) a capped line left half of it
+     empty */
+  max-width: none;
+}
+.konnash-answer > :first-child {
+  margin-top: 0;
+}
+.konnash-answer > :last-child {
+  margin-bottom: 0;
+}
+.konnash-answer p,
+.konnash-a-p {
+  margin: 0 0 0.7em;
+}
+.konnash-a-heading {
+  font-weight: 650;
+  margin: 1.1em 0 0.35em;
+  line-height: 1.35;
+}
+.konnash-a-heading[data-level="1"],
+.konnash-a-heading[data-level="2"] {
+  font-size: 1.08em;
+}
+.konnash-a-heading[data-level="4"] {
+  font-size: 0.95em;
+  color: var(--k-muted);
+}
+
+/* Lists: real lists, with the marker hanging on the reading side */
+.konnash-a-list {
+  margin: 0.2em 0 0.8em;
+  padding-inline-start: 1.4em;
+}
+.konnash-a-list .konnash-a-list {
+  margin: 0.2em 0 0.3em;
+}
+.konnash-a-item {
+  margin: 0.2em 0 0.35em;
+  padding-inline-start: 0.15em;
+}
+.konnash-a-item::marker {
+  color: var(--k-muted);
+}
+.konnash-a-item > .konnash-a-p {
+  margin-bottom: 0.35em;
+}
+
+/* Quotes */
+.konnash-a-quote {
+  margin: 0.4em 0 0.8em;
+  padding: 0.1em 0.9em;
+  border-inline-start: 3px solid color-mix(in srgb, var(--k-accent) 45%, transparent);
+  color: color-mix(in srgb, var(--k-text) 85%, var(--k-muted));
+}
+.konnash-a-quote > :last-child {
+  margin-bottom: 0;
+}
+
+/* Tables: columns keep a readable width and the table scrolls sideways
+   inside its own frame when it is wider than the pane (as in chat apps),
+   instead of squeezing every column until words break one per line. Each
+   column asks for a readable width (--cols is the column count): a table
+   that fits the pane fills it, and one that doesn't scrolls.
+   The frame's width comes from the pane, never from the table: Zotero's
+   pane can't get narrower than what it holds, so a wide table would
+   otherwise hold the whole pane open at its width (and leave nothing to
+   scroll). Size containment keeps the table's width inside its frame */
+.konnash-a-table-wrap {
+  contain: inline-size;
+  margin: 0.3em 0 0.9em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius-s);
+  scrollbar-width: thin;
+}
+.konnash-a-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: calc(var(--cols, 2) * 9em);
+  font-size: 0.94em;
+  line-height: 1.5;
+}
+.konnash-a-table th,
+.konnash-a-table td {
+  padding: 6px 9px;
+  text-align: start;
+  vertical-align: top;
+  border-bottom: 1px solid var(--k-line);
+  min-width: 6em;
+  overflow-wrap: break-word;
+}
+.konnash-a-table th {
+  font-weight: 650;
+  background: var(--k-raised);
+}
+.konnash-a-table tr:last-child td {
+  border-bottom: none;
+}
+.konnash-a-table :is(th, td) + :is(th, td) {
+  border-inline-start: 1px solid var(--k-line);
+}
+.konnash-a-table .konnash-center {
+  text-align: center;
+}
+
+/* Code and rules */
+.konnash-answer code {
+  font-family: var(--monospace-font, monospace);
+  font-size: 0.9em;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--k-hover);
+}
+/* Long code lines scroll inside the block, never widen the pane (as tables) */
+.konnash-a-code {
+  contain: inline-size;
+  margin: 0.3em 0 0.9em;
+  padding: 8px 10px;
+  border-radius: var(--k-radius-s);
+  background: var(--k-hover);
+  overflow-x: auto;
+  text-align: left;
+}
+.konnash-a-code code {
+  padding: 0;
+  background: none;
+  white-space: pre;
+}
+.konnash-a-rule {
+  border: none;
+  border-top: 1px solid var(--k-line);
+  margin: 1em 0;
+}
+
+/* "Read closely": where to go next, set apart from the answer */
+.konnash-pointer {
+  margin: 1em 0 0.2em;
+  padding: 8px 12px;
+  border-radius: var(--k-radius-s);
+  background: var(--k-accent-soft);
+}
+.konnash-pointer .konnash-a-p {
+  margin: 0;
+}
+
+/* "The answer continues below" while it arrives */
+.k-more-below {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--k-line);
+  background: var(--k-surface);
+  color: var(--k-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+.k-more-below:hover {
+  background: var(--k-raised);
+}
+
+/* Citations: faint footnote numbers */
+sup.konnash-cite {
+  font-size: 0.7em;
+  line-height: 0;
+  vertical-align: super;
+  /* A larger target than the digit itself, so it is easy to hover */
+  padding: 2px 3px;
+  margin: 0 -1px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--k-accent);
+  opacity: 0.75;
+  cursor: pointer;
+  border-radius: 3px;
+  outline: none;
+}
+sup.konnash-cite:hover,
+sup.konnash-cite:focus-visible,
+sup.konnash-cite.konnash-cite-active {
+  opacity: 1;
+  background: var(--k-accent-soft);
+}
+sup.konnash-cite-general {
+  color: var(--k-muted);
+  cursor: help;
+}
+sup.konnash-cite-invalid {
+  color: var(--k-error);
+  cursor: help;
+}
+sup.konnash-cite-sep {
+  font-size: 0.66em;
+  line-height: 0;
+  color: var(--k-accent);
+  opacity: 0.5;
+}
+.konnash-show-uncited .konnash-uncited {
+  background: color-mix(in srgb, #e07b24 16%, transparent);
+  border-radius: 3px;
+}
+
+.konnash-a-footer,
+.konnash-a-tools {
+  font-size: 0.78em;
+  line-height: 1.4;
+  color: var(--k-muted);
+}
+.konnash-a-footer {
+  margin-top: 2px;
+}
+.konnash-a-tools {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.k-turn:hover .konnash-a-tools,
+.konnash-a-tools:focus-within {
+  opacity: 1;
+}
+.konnash-link-quiet {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.konnash-link-quiet:hover {
+  color: var(--k-accent);
+}
+
+/* Reasoning */
+.konnash-thinking {
+  color: var(--k-muted);
+  font-style: italic;
+}
+.konnash-thinking::after {
+  content: "";
+  animation: k-dots 1.4s steps(4, end) infinite;
+}
+@keyframes k-dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+}
+.konnash-think-live {
+  color: var(--k-muted);
+}
+.konnash-think-tail {
+  margin-top: 2px;
+  font-size: 0.82em;
+  line-height: 1.45;
+  opacity: 0.75;
+  max-height: 4.4em;
+  overflow: hidden;
+  white-space: pre-wrap;
+  mask-image: linear-gradient(to bottom, transparent, black 45%);
+}
+details.konnash-think {
+  margin-bottom: 6px;
+  font-size: 0.82em;
+  color: var(--k-muted);
+}
+summary {
+  cursor: pointer;
+  list-style: none;
+  width: fit-content;
+  user-select: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+summary.konnash-think-summary::after,
+summary.konnash-context-summary::after {
+  content: " ▸";
+  opacity: 0.7;
+}
+summary.konnash-think-summary:dir(rtl)::after,
+summary.konnash-context-summary:dir(rtl)::after {
+  content: " ◂";
+}
+details[open] > summary.konnash-think-summary::after,
+details[open] > summary.konnash-context-summary::after {
+  content: " ▾";
+}
+.konnash-think-body {
+  margin: 4px 0 2px;
+  padding-inline-start: 10px;
+  border-inline-start: 2px solid var(--k-line);
+  line-height: 1.5;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.konnash-think-body p {
+  margin: 0 0 0.5em;
+}
+
+/* Context line */
+.konnash-context {
+  margin-top: 6px;
+  font-size: 0.8em;
+  color: var(--k-muted);
+  line-height: 1.45;
+}
+.konnash-context-plain {
+  font-style: italic;
+}
+.konnash-context-body {
+  margin: 4px 0 2px;
+  padding: 6px 8px;
+  border-radius: var(--k-radius-s);
+  background: color-mix(in srgb, var(--k-accent) 6%, transparent);
+}
+.konnash-context-why {
+  margin-bottom: 4px;
+}
+.konnash-context-row {
+  display: flex;
+  gap: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.konnash-context-row:hover {
+  background: var(--k-accent-soft);
+}
+.konnash-context-score {
+  flex: none;
+  color: var(--k-accent);
+  letter-spacing: 1px;
+  font-size: 9px;
+  padding-top: 2px;
+}
+.konnash-context-title {
+  color: var(--k-text);
+}
+.konnash-context-reason {
+  font-style: italic;
+}
+.konnash-context-foot {
+  margin-top: 4px;
+  font-size: 0.92em;
+  opacity: 0.8;
+}
+
+/* Hover card */
+.konnash-card {
+  position: fixed;
+  z-index: 1000;
+  padding: 10px 12px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius);
+  background: var(--k-surface);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.konnash-card-meta {
+  color: var(--k-muted);
+  font-size: 11px;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.konnash-card-quote {
+  max-height: 170px;
+  overflow-y: auto;
+  padding-inline-start: 8px;
+  border-inline-start: 2px solid var(--k-accent);
+}
+.konnash-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.konnash-card-button {
+  padding: 2px 9px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius-s);
+  font-size: 11px;
+}
+.konnash-card-button:hover {
+  border-color: var(--k-accent);
+  color: var(--k-accent);
+}
+
+/* ------------------------------------------------------------- Composer */
+
+.k-composer {
+  padding-top: 8px;
+}
+.k-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.k-pill {
+  padding: 2px 10px;
+  border: 1px solid var(--k-line);
+  border-radius: 999px;
+  color: var(--k-muted);
+  font-size: 0.8em;
+  line-height: 1.6;
+}
+.k-pill:hover {
+  color: var(--k-accent);
+  border-color: var(--k-accent);
+}
+.k-pill.k-custom {
+  border-style: dashed;
+}
+.k-box {
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius);
+  background: var(--k-raised);
+  transition: border-color 0.12s;
+}
+.k-box:focus-within {
+  border-color: var(--k-accent);
+}
+.k-box-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--k-line);
+  color: var(--k-accent);
+  font-size: 0.8em;
+  line-height: 1.4;
+}
+.k-box-quote {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 8px 8px 0;
+}
+.k-box-quote .k-quote {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.k-input {
+  display: block;
+  width: 100%;
+  min-height: 3.2em;
+  max-height: 180px;
+  padding: 10px 12px 4px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  line-height: 1.5;
+}
+.k-input::placeholder {
+  color: var(--k-faint);
+}
+.k-box-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 4px 6px;
+  padding-inline: 8px 6px;
+}
+.k-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 70%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--k-muted);
+  font-size: 0.82em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.k-scope:hover {
+  background: var(--k-hover);
+  color: var(--k-text);
+}
+.k-scope.k-on {
+  color: var(--k-accent);
+  background: var(--k-accent-soft);
+}
+.k-scope-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-scope svg.k-chev {
+  width: 10px;
+  height: 10px;
+}
+/* The main model, next to Send: shrinks before the scope does */
+.k-scope.k-model {
+  min-width: 0;
+  max-width: 42%;
+  flex: 0 1 auto;
+}
+.k-model-list {
+  display: flex;
+  flex-direction: column;
+}
+.k-icon-space {
+  flex: none;
+  width: 16px;
+}
+.k-menu-find {
+  display: block;
+  box-sizing: border-box;
+  width: calc(100% - 8px);
+  margin: 2px 4px 4px;
+  padding: 5px 8px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius-s);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.k-spacer {
+  flex: 1;
+}
+.k-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--k-accent);
+  color: white;
+}
+.k-send:disabled {
+  background: var(--k-line);
+  color: var(--k-muted);
+  opacity: 1;
+}
+.k-send svg {
+  stroke-width: 2;
+}
+
+/* ------------------------------------------------------------- Highlight chip */
+
+.k-dock {
+  position: relative;
+}
+/* Room under the last answer, so the chip never covers it */
+.k-panel.k-has-hl .k-body {
+  padding-bottom: 44px;
+}
+.k-hl {
+  position: absolute;
+  inset-inline-end: 0;
+  bottom: calc(100% + 4px);
+  z-index: 5;
+  display: flex;
+  align-items: stretch;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, #8f6ee8 40%, var(--k-line));
+  border-radius: 999px;
+  background: var(--k-surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+  font-size: 12px;
+  line-height: 1.3;
+  overflow: hidden;
+  animation: k-hl-in 0.16s ease-out;
+}
+@keyframes k-hl-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.k-hl-show {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding-block: 4px;
+  padding-inline: 10px 8px;
+  color: var(--k-muted);
+  font-variant-numeric: tabular-nums;
+}
+.k-hl-show:disabled {
+  opacity: 1;
+}
+.k-hl-show:hover:not(:disabled) {
+  background: var(--k-hover);
+  color: var(--k-text);
+}
+.k-hl-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8f6ee8;
+}
+.k-hl.k-pulse .k-hl-dot {
+  animation: k-hl-pulse 0.9s ease-out;
+}
+@keyframes k-hl-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, #8f6ee8 65%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+.k-hl-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.k-hl-where {
+  color: var(--k-text);
+}
+.k-hl-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding-block: 4px;
+  padding-inline: 8px 11px;
+  border-inline-start: 1px solid var(--k-line);
+  color: var(--k-accent);
+  font-weight: 600;
+}
+.k-hl-clear:hover {
+  background: var(--k-accent-soft);
+}
+.k-hl-clear svg.k-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.9;
+}
+
+/* Text direction (⋯ menu) */
+.k-dirseg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--k-radius-s);
+  background: var(--k-hover);
+}
+.k-dirseg button {
+  padding: 1px 8px;
+  border-radius: 5px;
+  color: var(--k-muted);
+  font-size: 0.86em;
+  font-weight: 600;
+}
+.k-dirseg button.k-selected {
+  background: var(--k-surface);
+  color: var(--k-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ------------------------------------------------------------- Popovers */
+
+.k-popover {
+  position: fixed;
+  z-index: 900;
+  min-width: 200px;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--k-radius);
+  background: var(--k-surface);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.k-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--k-radius-s);
+}
+.k-menu-item:hover:not(:disabled),
+.k-menu-item.k-selected {
+  background: var(--k-hover);
+}
+.k-menu-item svg.k-icon {
+  margin-top: 1px;
+  color: var(--k-muted);
+}
+.k-menu-item.k-selected svg.k-icon {
+  color: var(--k-accent);
+}
+.k-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.k-menu-label {
+  font-weight: 500;
+}
+.k-menu-desc {
+  color: var(--k-muted);
+  font-size: 0.88em;
+}
+.k-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--k-line);
+}
+.k-menu-status {
+  padding: 6px 10px 4px;
+  color: var(--k-muted);
+  font-size: 0.85em;
+}
+.k-menu-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-block: 4px;
+  padding-inline: 10px 6px;
+}
+
+.k-size {
+  min-width: 2em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------- Notebook */
+
+.k-seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin: 8px 0 10px;
+  border-radius: var(--k-radius-s);
+  background: var(--k-hover);
+}
+.k-seg button {
+  flex: 1;
+  padding: 4px 0;
+  border-radius: 5px;
+  text-align: center;
+  color: var(--k-muted);
+  font-size: 0.86em;
+  font-weight: 600;
+}
+.k-seg button.k-selected {
+  background: var(--k-surface);
+  color: var(--k-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.k-list {
+  display: flex;
+  flex-direction: column;
+}
+.k-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 6px;
+  border-radius: var(--k-radius-s);
+  cursor: pointer;
+  line-height: 1.4;
+}
+.k-row:hover {
+  background: var(--k-hover);
+}
+.k-row-main {
+  flex: 1;
+  min-width: 0;
+}
+/* A long title (a document's full title, or a paragraph read as a heading)
+   wraps to two lines, then ends with "…"; the whole of it shows on hover */
+.k-row-title {
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+/* Renaming a conversation, in place */
+.k-rename {
+  width: 100%;
+  min-width: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--k-accent);
+  border-radius: var(--k-radius-s);
+  background: var(--k-surface);
+  font-weight: inherit;
+  outline: none;
+}
+.k-row-meta {
+  color: var(--k-muted);
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+.k-row-snippet {
+  color: var(--k-muted);
+  font-size: 0.86em;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.k-row-side {
+  flex: none;
+  color: var(--k-muted);
+  font-size: 0.8em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.k-row .k-iconbtn {
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+}
+.k-row:hover .k-iconbtn {
+  opacity: 1;
+}
+.k-count {
+  min-width: 1.6em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--k-accent-soft);
+  color: var(--k-accent);
+  font-size: 0.78em;
+  font-weight: 600;
+  text-align: center;
+}
+.k-role {
+  margin-inline-start: 6px;
+  color: var(--k-faint);
+  font-size: 0.78em;
+  font-weight: 400;
+}
+/* Konnash's description of text the document gives no heading: not a name */
+.k-untitled {
+  color: var(--k-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+.k-level-1 {
+  padding-inline-start: 22px;
+}
+.k-sentences {
+  margin-block: 0 8px;
+  margin-inline: 28px 6px;
+  padding: 6px 8px;
+  border-inline-start: 2px solid var(--k-line);
+  font-size: 0.86em;
+  line-height: 1.5;
+}
+.k-sentence {
+  padding: 1px 3px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.k-sentence:hover {
+  background: var(--k-accent-soft);
+}
+.k-sid {
+  font-family: var(--monospace-font, monospace);
+  font-size: 0.82em;
+  color: var(--k-faint);
+  margin-inline-end: 4px;
+}
+.k-empty-small {
+  padding: 18px 6px;
+  color: var(--k-muted);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.k-section-label {
+  margin: 14px 6px 4px;
+  color: var(--k-faint);
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.k-text-btn {
+  color: var(--k-accent);
+  font-size: 0.86em;
+}
+.k-text-btn:hover {
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------- Toast */
+
+.k-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: var(--k-radius-s);
+  background: var(--k-surface);
+  border: 1px solid var(--k-line);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 950;
+}
+.k-toast button {
+  color: var(--k-accent);
+  font-weight: 600;
+}
+
+/* ---------------------------------------- Notices about sending the document */
+
+.k-notices:empty {
+  display: none;
+}
+.k-notices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.k-notice {
+  position: relative;
+  padding: 9px 12px 10px;
+  border: 1px solid var(--k-line, rgba(127, 127, 127, 0.25));
+  border-radius: var(--k-radius-s);
+  background: var(--k-accent-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.k-notice-noai {
+  background: color-mix(in srgb, #d4a017 12%, transparent);
+  padding-inline-end: 30px;
+}
+.k-notice-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.k-notice-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.k-notice-primary {
+  padding: 3px 12px;
+  border-radius: var(--k-radius-s);
+  background: var(--k-accent);
+  color: #fff;
+}
+.k-notice-close {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.65;
+}
+.k-notice-close:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* A place the model named by its bare id ("paragraph P23"), as a link */
+.konnash-ref {
+  color: var(--k-accent);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  unicode-bidi: isolate;
+  border-radius: 3px;
+}
+.konnash-ref:hover,
+.konnash-ref:focus-visible {
+  background: var(--k-accent-soft);
+}
